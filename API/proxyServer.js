@@ -1,20 +1,20 @@
-const fetch = require('node-fetch');
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
 
-module.exports = async (req, res) => {
+const app = express();
+app.use(cors());
+
+app.get("/deezer", async (req, res) => {
   try {
-    // Extract path from request
-    const path = req.url.split('/proxy/')[1];
-    const targetUrl = `https://cdnt-preview.dzcdn.net/${path}`;
-
-    // Forward headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Cache-Control', 'public, max-age=31536000');
-
-    // Proxy the request
-    const response = await fetch(targetUrl);
-    response.body.pipe(res);
+    const response = await fetch(
+      `https://api.deezer.com/chart/0/tracks?limit=10`
+    );
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Proxy error' });
+    res.status(500).json({ error: error.message });
   }
-};
+});
+
+app.listen(3000, () => console.log("Proxy server running on port 3000"));
